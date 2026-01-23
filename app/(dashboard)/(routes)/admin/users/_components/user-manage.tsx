@@ -172,7 +172,7 @@ export const UserManagement = ({
     if (!user) {
       // si estoy creando un user, busco los agentes de remax, y busco si el email del user coincide con algun agente
       // si coincide, le asigno el id del agente a la propiedad agentId del user
-      let foundAgent = null;
+      let foundAgent: Agent | null = null;
 
       try {
         const agents = await api.getRemaxAgents();

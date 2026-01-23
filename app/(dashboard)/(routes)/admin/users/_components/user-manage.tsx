@@ -80,14 +80,20 @@ const api = {
     const { valid, expired } = await jwtHandler(token);
 
     if (expired || !valid) {
-      const tokenToast = toast.loading(
-        "Token expirado. Refrescando..."
-      );
-      const newToken = await refreshTokenJWT();
+      try {
+        const tokenToast = toast.loading(
+          "Token expirado. Refrescando..."
+        );
+        const newToken = await refreshTokenJWT();
 
-      newToken &&
-        (token = newToken) &&
-        toast.dismiss(tokenToast);
+        newToken &&
+          (token = newToken) &&
+          toast.dismiss(tokenToast);
+      } catch (error) {
+        // Si falla el refresh, continuamos sin token o lanzamos el error
+        console.error("Error al refrescar token:", error);
+        // No lanzamos el error aquí, dejamos que el fetch intente con el token viejo o vacío
+      }
     }
 
     console.log("token", token);
@@ -99,7 +105,6 @@ const api = {
         },
       });
       if (!response.ok) {
-        toast.error("Error al obtener los agentes de Remax");
         throw new Error("Error al obtener los agentes de Remax");
       }
       const data = await response.json();
@@ -107,6 +112,8 @@ const api = {
       return agents;
     } catch (error) {
       console.error("Error al obtener agentes de Remax:", error);
+      // Retornamos un array vacío en lugar de undefined para que el código pueda continuar
+      return [];
     }
   },
 };
@@ -165,36 +172,47 @@ export const UserManagement = ({
     if (!user) {
       // si estoy creando un user, busco los agentes de remax, y busco si el email del user coincide con algun agente
       // si coincide, le asigno el id del agente a la propiedad agentId del user
-      const agents = await api.getRemaxAgents();
-      console.log("agents", agents);
-      const registrationEmail = data.email;
-      console.log("data", data);
-      console.log("registrationEmail", registrationEmail);
+      let foundAgent = null;
 
-      const foundAgent =
-        agents &&
-        agents.find((agent: Agent) =>
-          agent.emails.some(
-            (email: Email) =>
-              email.primary === true &&
-              email.value === registrationEmail
-          )
+      try {
+        const agents = await api.getRemaxAgents();
+        console.log("agents", agents);
+        const registrationEmail = data.email;
+        console.log("data", data);
+        console.log("registrationEmail", registrationEmail);
+
+        if (agents && agents.length > 0) {
+          foundAgent = agents.find((agent: Agent) =>
+            agent.emails.some(
+              (email: Email) =>
+                email.primary === true &&
+                email.value === registrationEmail
+            )
+          );
+        }
+
+        if (!foundAgent) {
+          toast.error(
+            "No se encontro el email del agente en Remax. El usuario se creará sin agentId."
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error al obtener agentes de Remax:",
+          error
         );
-
-      if (!foundAgent) {
         toast.error(
-          "No se encontro el email del agente en Remax"
+          "No se pudieron obtener los agentes de Remax. El usuario se creará sin agentId."
         );
-        return;
       }
 
-      api.createUser({ ...data, agentId: foundAgent.id }).then(
+      api.createUser({ ...data, agentId: foundAgent?.id }).then(
         res => {
           toast.success("Usuario creado");
           handleRefreshUsers({
             ...data,
             id: res.id,
-            agentId: foundAgent.id,
+            agentId: foundAgent?.id,
           });
         },
         err => {

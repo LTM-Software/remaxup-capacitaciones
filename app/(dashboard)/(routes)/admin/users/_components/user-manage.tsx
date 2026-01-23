@@ -204,6 +204,7 @@ export const UserManagement = ({
         toast.error(
           "No se pudieron obtener los agentes de Remax. El usuario se creará sin agentId."
         );
+        // No retornamos aquí, permitimos que continúe la creación del usuario sin agentId
       }
 
       api.createUser({ ...data, agentId: foundAgent?.id }).then(

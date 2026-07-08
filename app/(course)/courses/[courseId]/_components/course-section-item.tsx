@@ -38,15 +38,19 @@ export const CourseSectionItem = ({
         router.push(`/courses/${courseId}/sections/${id}`);
       }}
       className={cn(
-        "flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-8 pr-4 py-3 transition-all hover:text-slate-600 hover:bg-slate-300/20 text-left",
-        isActive &&
-          "text-slate-700 bg-sky-50 border-r-2 border-sky-600 hover:text-slate-700",
-        isCompleted && "text-emerald-700 hover:text-emerald-700",
+        "w-full flex items-center gap-x-2 px-2 py-1.5 rounded-md text-sm text-slate-600 hover:bg-slate-100 transition text-left",
+        isActive && "bg-sky-50 text-sky-700 font-medium",
+        isCompleted && "text-emerald-700",
         isLocked &&
           "text-slate-400 cursor-not-allowed hover:bg-transparent"
       )}
     >
-      <Icon size={18} className="shrink-0" />
+      <Icon
+        className={cn(
+          "h-3.5 w-3.5 shrink-0",
+          isCompleted && "text-emerald-600"
+        )}
+      />
       <span className="line-clamp-2">{label}</span>
     </button>
   );

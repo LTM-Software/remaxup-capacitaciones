@@ -29,57 +29,51 @@ export const CourseEvaluationItem = ({
   const pathname = usePathname();
   const router = useRouter();
 
-  const Icon = isLocked ? Lock : passed ? CheckCircle : ClipboardCheck;
+  const Icon = isLocked
+    ? Lock
+    : passed
+      ? CheckCircle
+      : ClipboardCheck;
   const isActive = pathname?.includes(id);
-
-  const onClick = () => {
-    if (isLocked) return;
-    router.push(`/courses/${courseId}/evaluations/${id}`);
-  };
 
   return (
     <button
-      onClick={onClick}
       type="button"
+      onClick={() => {
+        if (isLocked) return;
+        router.push(`/courses/${courseId}/evaluations/${id}`);
+      }}
       className={cn(
-        "flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20",
-        isActive &&
-          "text-slate-700 bg-slate-200/20 hover:text-slate-700",
-        passed && "text-emerald-700 hover:text-emerald-700",
-        isLocked && "text-slate-400 cursor-not-allowed hover:bg-transparent"
+        "w-full flex items-start gap-x-2 px-2 py-1.5 rounded-md text-sm font-medium text-purple-700 hover:bg-purple-50 transition text-left",
+        isActive && "bg-purple-100",
+        passed && "text-emerald-700 hover:bg-emerald-50",
+        isLocked &&
+          "text-slate-400 cursor-not-allowed hover:bg-transparent"
       )}
     >
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 py-4">
-        <Icon
-          size={22}
-          className={cn(
-            "text-slate-500",
-            isActive && "text-slate-700",
-            passed && "text-emerald-700"
+      <Icon
+        className={cn(
+          "h-4 w-4 shrink-0 mt-0.5",
+          passed && "text-emerald-600"
+        )}
+      />
+      <span className="flex flex-col">
+        <span className="line-clamp-2">{label}</span>
+        <span className="flex flex-wrap gap-x-2 text-[10px] font-semibold">
+          {isFinal && (
+            <span className="text-amber-600">Final</span>
           )}
-        />
-        <span className="text-left">{label}</span>
-        {isFinal && (
-          <span className="text-[10px] font-semibold text-amber-600">
-            (Final)
-          </span>
-        )}
-        {isRequired && !isFinal && (
-          <span className="text-[10px] font-semibold text-orange-600">
-            (Obligatoria)
-          </span>
-        )}
-        {passed && (
-          <span className="text-[10px] font-semibold text-emerald-700">
-            (Aprobada)
-          </span>
-        )}
-        {attempted && !passed && !isLocked && (
-          <span className="text-[10px] font-semibold text-amber-600">
-            (Reintentar)
-          </span>
-        )}
-      </div>
+          {isRequired && !isFinal && (
+            <span className="text-orange-600">Obligatoria</span>
+          )}
+          {passed && (
+            <span className="text-emerald-700">Aprobada</span>
+          )}
+          {attempted && !passed && !isLocked && (
+            <span className="text-amber-600">Reintentar</span>
+          )}
+        </span>
+      </span>
     </button>
   );
 };

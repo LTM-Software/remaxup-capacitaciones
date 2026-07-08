@@ -147,28 +147,31 @@ const ChapterIdPage = async ({
             <Preview value={chapter.description!} />
           </div>
 
-          {/* Secciones del capítulo: páginas + documentos */}
+          {/* Secciones del capítulo: cada una con sus páginas y documentos */}
           {!purchaseLocked &&
             sections.map(section => (
-              <div key={section.id} className="mt-4">
-                <Separator />
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold mb-3">
+              <div key={section.id} className="px-4 mt-6">
+                <div className="rounded-lg border bg-white overflow-hidden">
+                  <div className="bg-slate-50 border-b px-4 py-2.5 font-semibold text-slate-800">
                     {section.title}
-                  </h3>
-                  <div className="space-y-4">
+                  </div>
+                  <div className="p-4 space-y-4">
+                    {section.items.length === 0 && (
+                      <p className="text-sm text-slate-400 italic">
+                        Sección vacía.
+                      </p>
+                    )}
                     {section.items.map(item =>
                       item.type === "PAGE" ? (
-                        <div
-                          key={item.id}
-                          className="border rounded-md p-2 bg-white"
-                        >
+                        <div key={item.id}>
                           {item.title && (
-                            <p className="font-medium px-2 pt-1">
+                            <p className="font-medium text-slate-800 mb-1">
                               {item.title}
                             </p>
                           )}
-                          <Preview value={item.content || ""} />
+                          <div className="prose prose-sm max-w-none">
+                            <Preview value={item.content || ""} />
+                          </div>
                         </div>
                       ) : (
                         <DocumentViewerModal
@@ -178,11 +181,14 @@ const ChapterIdPage = async ({
                         >
                           <button
                             type="button"
-                            className="flex items-center p-3 w-full bg-sky-100 border text-sky-700 rounded-md hover:underline text-left"
+                            className="flex items-center gap-x-3 p-3 w-full border rounded-md hover:bg-slate-50 transition text-left"
                           >
-                            <FileText className="mr-2 shrink-0" />
-                            <span className="line-clamp-1">
+                            <FileText className="h-5 w-5 text-sky-600 shrink-0" />
+                            <span className="flex-1 line-clamp-1 text-slate-700">
                               {item.title}
+                            </span>
+                            <span className="text-xs text-sky-600 font-medium shrink-0">
+                              Ver
                             </span>
                           </button>
                         </DocumentViewerModal>
@@ -193,10 +199,13 @@ const ChapterIdPage = async ({
               </div>
             ))}
 
-          {!!attachments.length && (
-            <>
-              <Separator />
-              <div className="p-4 flex flex-col gap-y-2">
+          {/* Archivos del curso (disponibles en toda la capacitación) */}
+          {!purchaseLocked && !!attachments.length && (
+            <div className="px-4 mt-6">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                Archivos del curso
+              </h3>
+              <div className="flex flex-col gap-y-2">
                 {attachments.map(attachment => (
                   <DocumentViewerModal
                     key={attachment.id}
@@ -205,17 +214,20 @@ const ChapterIdPage = async ({
                   >
                     <button
                       type="button"
-                      className="flex items-center p-3 w-full bg-sky-200 border text-sky-700 rounded-md hover:underline text-left"
+                      className="flex items-center gap-x-3 p-3 w-full border rounded-md hover:bg-slate-50 transition text-left"
                     >
-                      <File className="mr-2 shrink-0" />
-                      <p className="line-clamp-1">
+                      <File className="h-5 w-5 text-slate-500 shrink-0" />
+                      <span className="flex-1 line-clamp-1 text-slate-700">
                         {sanitizeFileName(attachment.name)}
-                      </p>
+                      </span>
+                      <span className="text-xs text-sky-600 font-medium shrink-0">
+                        Ver
+                      </span>
                     </button>
                   </DocumentViewerModal>
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

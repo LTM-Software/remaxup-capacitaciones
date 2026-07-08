@@ -1,7 +1,9 @@
-import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+import { getCourseCurriculum } from "@/actions/get-course-curriculum";
+import { isAdmin } from "@/lib/isAdminCheck";
 
 const CourseIdPage = async ({
   params,
@@ -10,44 +12,35 @@ const CourseIdPage = async ({
 }) => {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
+  const role = session?.user?.role;
 
   if (!userId) {
     return redirect("/login");
   }
 
-  const course = await db.course.findUnique({
-    where: {
-      id: params.courseId,
-    },
-    include: {
-      chapters: {
-        where: {
-          isPublished: true,
-        },
-        orderBy: {
-          position: "asc",
-        },
-        include: {
-          userProgress: {
-            where: { userId },
-          },
-        },
-      },
-    },
+  const { items } = await getCourseCurriculum({
+    userId,
+    courseId: params.courseId,
+    isAdmin: isAdmin(role),
   });
 
-  if (!course || course.chapters.length === 0) {
+  if (items.length === 0) {
     return redirect("/");
   }
 
-  // Abrir el primer capítulo sin completar; si están todos
-  // completos, abrir el primero.
-  const firstIncomplete = course.chapters.find(
-    chapter => !chapter.userProgress?.[0]?.isCompleted
-  );
-  const target = firstIncomplete ?? course.chapters[0];
+  // Primer ítem accesible sin completar; si no hay, el primer accesible; si
+  // no, el primero de la lista.
+  const target =
+    items.find(i => !i.completed && !i.locked) ||
+    items.find(i => !i.locked) ||
+    items[0];
 
-  return redirect(`/courses/${course.id}/chapters/${target.id}`);
+  const href =
+    target.type === "chapter"
+      ? `/courses/${params.courseId}/chapters/${target.id}`
+      : `/courses/${params.courseId}/evaluations/${target.id}`;
+
+  return redirect(href);
 };
 
 export default CourseIdPage;

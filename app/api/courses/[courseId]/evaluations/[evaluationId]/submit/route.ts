@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getServerSessionFunc } from "@/app/api/auth/_components/getSessionFunction";
 import { isAdmin } from "@/lib/isAdminCheck";
+import { getCourseCurriculum } from "@/actions/get-course-curriculum";
 
 // El usuario envía sus respuestas; se corrige y se guarda el intento.
 export async function POST(
@@ -28,9 +29,27 @@ export async function POST(
       },
     });
 
-    if (!purchase && !isAdmin(role)) {
+    const admin = isAdmin(role);
+
+    if (!purchase && !admin) {
       return new NextResponse(
         "Necesitás tener el curso para rendir la evaluación",
+        { status: 403 }
+      );
+    }
+
+    // Bloqueo secuencial / final (servidor)
+    const { items } = await getCourseCurriculum({
+      userId,
+      courseId: params.courseId,
+      isAdmin: admin,
+    });
+    const current = items.find(
+      i => i.type === "evaluation" && i.id === params.evaluationId
+    );
+    if (current?.locked && !admin) {
+      return new NextResponse(
+        current.lockReason || "Evaluación bloqueada.",
         { status: 403 }
       );
     }

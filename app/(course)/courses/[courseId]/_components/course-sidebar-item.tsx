@@ -31,6 +31,7 @@ export const CourseSidebarItem = ({
   const isActive = pathname?.includes(id);
 
   const onClick = () => {
+    if (isLocked) return;
     router.push(`/courses/${courseId}/chapters/${id}`);
   };
 

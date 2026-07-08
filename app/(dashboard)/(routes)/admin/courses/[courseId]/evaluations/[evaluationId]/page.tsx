@@ -11,6 +11,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { EvaluationTitleForm } from "./_components/title-form";
 import { EvaluationDescriptionForm } from "./_components/description-form";
 import { PassingScoreForm } from "./_components/passing-score-form";
+import { EvaluationSettingsForm } from "./_components/settings-form";
 import { EvaluationActions } from "./_components/actions";
 import { QuestionsForm } from "./_components/questions-form";
 
@@ -108,6 +109,11 @@ const EvaluationIdPage = async ({
               evaluationId={params.evaluationId}
             />
             <PassingScoreForm
+              initialData={evaluation}
+              courseId={params.courseId}
+              evaluationId={params.evaluationId}
+            />
+            <EvaluationSettingsForm
               initialData={evaluation}
               courseId={params.courseId}
               evaluationId={params.evaluationId}

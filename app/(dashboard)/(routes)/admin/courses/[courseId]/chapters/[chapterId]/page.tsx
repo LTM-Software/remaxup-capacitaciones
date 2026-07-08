@@ -5,6 +5,7 @@ import {
   Eye,
   LayoutDashboard,
   Video,
+  FileStack,
 } from "lucide-react";
 
 import { db } from "@/lib/db";
@@ -16,6 +17,7 @@ import { ChapterDescriptionForm } from "./_components/chapter-description-form";
 import { ChapterAccessForm } from "./_components/chapter-access-form";
 import { ChapterVideoForm } from "./_components/chapter-video-form";
 import { ChapterActions } from "./_components/chapter-actions";
+import { SectionsForm } from "./_components/sections-form";
 
 const ChapterIdPage = async ({
   params,
@@ -29,6 +31,10 @@ const ChapterIdPage = async ({
     },
     include: {
       muxData: true,
+      sections: {
+        orderBy: { position: "asc" },
+        include: { items: { orderBy: { position: "asc" } } },
+      },
     },
   });
 
@@ -130,6 +136,19 @@ const ChapterIdPage = async ({
               courseId={params.courseId}
             />
           </div>
+        </div>
+        <div className="mt-8">
+          <div className="flex items-center gap-x-2">
+            <IconBadge icon={FileStack} />
+            <h2 className="text-xl">
+              Secciones (páginas y documentos)
+            </h2>
+          </div>
+          <SectionsForm
+            courseId={params.courseId}
+            chapterId={params.chapterId}
+            sections={chapter.sections}
+          />
         </div>
       </div>
     </>

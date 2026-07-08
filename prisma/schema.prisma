@@ -105,6 +105,7 @@ model Chapter {
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   userProgress UserProgress[]
+  sections     ChapterSection[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -315,6 +316,9 @@ model Evaluation {
   position     Int
   isPublished  Boolean @default(false)
   passingScore Int     @default(60) // % necesario para aprobar
+  isRequired   Boolean @default(false) // hay que aprobarla para habilitar la Final
+  isBlocking   Boolean @default(false) // traba los ítems siguientes hasta aprobarla
+  isFinal      Boolean @default(false) // evaluación final (se habilita al aprobar las obligatorias)
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -374,4 +378,44 @@ model EvaluationAttempt {
 
   @@index([evaluationId])
   @@index([userId])
+}
+
+// ------------------- SECCIONES POR CAPÍTULO (páginas + documentos) -------------------
+
+model ChapterSection {
+  id       String @id @default(uuid())
+  title    String
+  position Int
+
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  items SectionItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
+}
+
+enum SectionItemType {
+  PAGE
+  DOCUMENT
+}
+
+model SectionItem {
+  id       String          @id @default(uuid())
+  type     SectionItemType @default(PAGE)
+  title    String
+  content  String?         @db.MediumText // PAGE: HTML del editor
+  url      String?         @db.Text // DOCUMENT: URL del archivo en MinIO
+  position Int
+
+  sectionId String
+  section   ChapterSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sectionId])
 }

@@ -11,7 +11,7 @@ import { useConfettiStore } from "@/hooks/use-confetti-store";
 interface VideoPlayerProps {
   courseId: string;
   chapterId: string;
-  nextChapterId?: string;
+  nextHref?: string;
   isLocked: boolean;
   completeOnEnd: boolean;
   title: string;
@@ -22,7 +22,7 @@ interface VideoPlayerProps {
 export const VideoPlayer = ({
   courseId,
   chapterId,
-  nextChapterId,
+  nextHref,
   isLocked,
   completeOnEnd,
   title,
@@ -43,17 +43,15 @@ export const VideoPlayer = ({
           }
         );
 
-        if (!nextChapterId) {
+        if (!nextHref) {
           confetti.onOpen();
         }
 
         toast.success("Progreso actualizado");
         router.refresh();
 
-        if (nextChapterId) {
-          router.push(
-            `/courses/${courseId}/chapters/${nextChapterId}`
-          );
+        if (nextHref) {
+          router.push(nextHref);
         }
       }
     } catch {

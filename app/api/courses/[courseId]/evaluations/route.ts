@@ -18,14 +18,23 @@ export async function POST(
 
     const { title } = await req.json();
 
-    const lastEvaluation = await db.evaluation.findFirst({
-      where: { courseId: params.courseId },
-      orderBy: { position: "desc" },
-    });
+    // posición compartida con los capítulos (secuencia única del curso)
+    const [lastChapter, lastEvaluation] = await Promise.all([
+      db.chapter.findFirst({
+        where: { courseId: params.courseId },
+        orderBy: { position: "desc" },
+      }),
+      db.evaluation.findFirst({
+        where: { courseId: params.courseId },
+        orderBy: { position: "desc" },
+      }),
+    ]);
 
-    const newPosition = lastEvaluation
-      ? lastEvaluation.position + 1
-      : 1;
+    const newPosition =
+      Math.max(
+        lastChapter?.position ?? 0,
+        lastEvaluation?.position ?? 0
+      ) + 1;
 
     const evaluation = await db.evaluation.create({
       data: {

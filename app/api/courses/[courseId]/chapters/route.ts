@@ -30,18 +30,23 @@ export async function POST(
     //   });
     // }
 
-    const lastChapter = await db.chapter.findFirst({
-      where: {
-        courseId: params.courseId,
-      },
-      orderBy: {
-        position: "desc",
-      },
-    });
+    // posición compartida con las evaluaciones (secuencia única del curso)
+    const [lastChapter, lastEvaluation] = await Promise.all([
+      db.chapter.findFirst({
+        where: { courseId: params.courseId },
+        orderBy: { position: "desc" },
+      }),
+      db.evaluation.findFirst({
+        where: { courseId: params.courseId },
+        orderBy: { position: "desc" },
+      }),
+    ]);
 
-    const newPosition = lastChapter
-      ? lastChapter.position + 1
-      : 1;
+    const newPosition =
+      Math.max(
+        lastChapter?.position ?? 0,
+        lastEvaluation?.position ?? 0
+      ) + 1;
 
     const chapter = await db.chapter.create({
       data: {

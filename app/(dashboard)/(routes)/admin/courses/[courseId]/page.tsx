@@ -17,8 +17,7 @@ import { ImageForm } from "./_components/image-form";
 import { CategoryForm } from "./_components/category-form";
 import { PriceForm } from "./_components/price-form";
 import { AttachmentForm } from "./_components/attachment-form";
-import { ChaptersForm } from "./_components/chapters-form";
-import { EvaluationsForm } from "./_components/evaluations-form";
+import { CurriculumForm } from "./_components/curriculum-form";
 import { Actions } from "./_components/actions";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -141,37 +140,20 @@ const CourseIdPage = async ({
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ListChecks} />
                 <h2 className="text-xl">
-                  Capítulos de la capacitación
+                  Contenido del curso
                 </h2>
               </div>
-              <ChaptersForm
+              <CurriculumForm
                 initialData={course}
                 courseId={course.id}
               />
             </div>
-            {/* <div>
-              <div className="flex items-center gap-x-2">
-                <IconBadge icon={CircleDollarSign} />
-                <h2 className="text-xl">Vende tu curso</h2>
-              </div>
-              <PriceForm initialData={course} courseId={course.id} />
-            </div> */}
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={File} />
                 <h2 className="text-xl">Archivos & Agregados</h2>
               </div>
               <AttachmentForm
-                initialData={course}
-                courseId={course.id}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-x-2">
-                <IconBadge icon={ClipboardCheck} />
-                <h2 className="text-xl">Evaluaciones</h2>
-              </div>
-              <EvaluationsForm
                 initialData={course}
                 courseId={course.id}
               />

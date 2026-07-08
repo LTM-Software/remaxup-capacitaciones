@@ -5,6 +5,7 @@ import { Banner } from "@/components/banner";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { isAdmin } from "@/lib/isAdminCheck";
+import { getCourseCurriculum } from "@/actions/get-course-curriculum";
 
 import { EvaluationQuiz } from "./_components/evaluation-quiz";
 
@@ -47,7 +48,21 @@ const TakeEvaluationPage = async ({
     },
   });
 
-  const canTake = !!purchase || isAdmin(role);
+  const admin = isAdmin(role);
+
+  // Bloqueo secuencial / final
+  const { items } = await getCourseCurriculum({
+    userId,
+    courseId: params.courseId,
+    isAdmin: admin,
+  });
+  const currentItem = items.find(
+    i => i.type === "evaluation" && i.id === params.evaluationId
+  );
+  const sequentiallyLocked =
+    !!currentItem?.locked && (!!purchase || admin) && !admin;
+
+  const canTake = !!purchase || admin;
 
   const lastAttempt = await db.evaluationAttempt.findFirst({
     where: { userId, evaluationId: evaluation.id },
@@ -80,6 +95,14 @@ const TakeEvaluationPage = async ({
             <Banner
               variant="warning"
               label="Necesitás tener el curso para rendir esta evaluación."
+            />
+          ) : sequentiallyLocked ? (
+            <Banner
+              variant="warning"
+              label={
+                currentItem?.lockReason ||
+                "Esta evaluación está bloqueada por ahora."
+              }
             />
           ) : evaluation.questions.length === 0 ? (
             <p className="text-sm text-slate-500 italic">

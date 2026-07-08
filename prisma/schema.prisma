@@ -61,6 +61,7 @@ model Course {
   chapters    Chapter[]
   attachments Attachment[]
   purchases   Purchase[]
+  evaluations Evaluation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -303,4 +304,74 @@ model ProfileDocumentVariable {
 
   @@unique([profileId, documentVariableId])
   @@index([documentVariableId])
+}
+
+// ------------------- EVALUACIONES (quizzes por curso) -------------------
+
+model Evaluation {
+  id           String  @id @default(uuid())
+  title        String
+  description  String? @db.Text
+  position     Int
+  isPublished  Boolean @default(false)
+  passingScore Int     @default(60) // % necesario para aprobar
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  questions Question[]
+  attempts  EvaluationAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Question {
+  id       String @id @default(uuid())
+  text     String @db.Text
+  position Int
+
+  evaluationId String
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  options QuestionOption[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([evaluationId])
+}
+
+model QuestionOption {
+  id        String  @id @default(uuid())
+  text      String  @db.Text
+  isCorrect Boolean @default(false)
+  position  Int
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questionId])
+}
+
+model EvaluationAttempt {
+  id      String  @id @default(uuid())
+  userId  String
+  score   Int     @default(0) // porcentaje 0-100
+  passed  Boolean @default(false)
+  answers String  @db.MediumText // JSON { questionId: optionId }
+
+  evaluationId String
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([evaluationId])
+  @@index([userId])
 }

@@ -4,6 +4,7 @@ import {
   File,
   LayoutDashboard,
   ListChecks,
+  ClipboardCheck,
 } from "lucide-react";
 
 import { db } from "@/lib/db";
@@ -17,6 +18,7 @@ import { CategoryForm } from "./_components/category-form";
 import { PriceForm } from "./_components/price-form";
 import { AttachmentForm } from "./_components/attachment-form";
 import { ChaptersForm } from "./_components/chapters-form";
+import { EvaluationsForm } from "./_components/evaluations-form";
 import { Actions } from "./_components/actions";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -48,6 +50,11 @@ const CourseIdPage = async ({
       attachments: {
         orderBy: {
           createdAt: "desc",
+        },
+      },
+      evaluations: {
+        orderBy: {
+          position: "asc",
         },
       },
     },
@@ -155,6 +162,16 @@ const CourseIdPage = async ({
                 <h2 className="text-xl">Archivos & Agregados</h2>
               </div>
               <AttachmentForm
+                initialData={course}
+                courseId={course.id}
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-x-2">
+                <IconBadge icon={ClipboardCheck} />
+                <h2 className="text-xl">Evaluaciones</h2>
+              </div>
+              <EvaluationsForm
                 initialData={course}
                 courseId={course.id}
               />

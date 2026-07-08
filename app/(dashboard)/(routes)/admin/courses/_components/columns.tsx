@@ -105,12 +105,15 @@ export const columns: ColumnDef<Course>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <Link href={`/admin/courses/${id}`}>
-              <DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                href={`/admin/courses/${id}`}
+                className="flex items-center cursor-pointer"
+              >
                 <Pencil className="h-4 w-4 mr-2" />
                 Editar
-              </DropdownMenuItem>
-            </Link>
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

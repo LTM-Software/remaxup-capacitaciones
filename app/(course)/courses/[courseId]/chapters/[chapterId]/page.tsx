@@ -5,6 +5,7 @@ import { getChapter } from "@/actions/get-chapter";
 import { Banner } from "@/components/banner";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
+import { DocumentViewerModal } from "@/components/document-viewer-modal";
 
 import { VideoPlayer } from "./_components/video-player";
 import { CourseEnrollButton } from "./_components/course-enroll-button";
@@ -99,19 +100,23 @@ const ChapterIdPage = async ({
           {!!attachments.length && (
             <>
               <Separator />
-              <div className="p-4">
+              <div className="p-4 flex flex-col gap-y-2">
                 {attachments.map(attachment => (
-                  <a
-                    href={attachment.url}
-                    target="_blank"
+                  <DocumentViewerModal
                     key={attachment.id}
-                    className="flex items-center p-3 w-full bg-sky-200 border text-sky-700 rounded-md hover:underline"
+                    url={attachment.url}
+                    fileName={sanitizeFileName(attachment.name)}
                   >
-                    <File />
-                    <p className="line-clamp-1">
-                      {sanitizeFileName(attachment.name)}
-                    </p>
-                  </a>
+                    <button
+                      type="button"
+                      className="flex items-center p-3 w-full bg-sky-200 border text-sky-700 rounded-md hover:underline text-left"
+                    >
+                      <File className="mr-2 shrink-0" />
+                      <p className="line-clamp-1">
+                        {sanitizeFileName(attachment.name)}
+                      </p>
+                    </button>
+                  </DocumentViewerModal>
                 ))}
               </div>
             </>

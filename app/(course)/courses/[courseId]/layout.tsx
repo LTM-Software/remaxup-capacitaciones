@@ -42,6 +42,21 @@ const CourseLayout = async ({
           position: "asc",
         },
       },
+      evaluations: {
+        where: {
+          isPublished: true,
+        },
+        include: {
+          attempts: {
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
+        orderBy: {
+          position: "asc",
+        },
+      },
     },
   });
 

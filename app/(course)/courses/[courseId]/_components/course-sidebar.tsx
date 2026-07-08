@@ -1,10 +1,17 @@
-import { Chapter, Course, UserProgress } from "@prisma/client";
+import {
+  Chapter,
+  Course,
+  Evaluation,
+  EvaluationAttempt,
+  UserProgress,
+} from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { CourseProgress } from "@/components/course-progress";
 
 import { CourseSidebarItem } from "./course-sidebar-item";
+import { CourseEvaluationItem } from "./course-evaluation-item";
 import { Logo } from "@/app/(dashboard)/_components/logo";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -13,6 +20,9 @@ interface CourseSidebarProps {
   course: Course & {
     chapters: (Chapter & {
       userProgress: UserProgress[] | null;
+    })[];
+    evaluations?: (Evaluation & {
+      attempts: EvaluationAttempt[];
     })[];
   };
   progressCount: number;
@@ -62,6 +72,23 @@ export const CourseSidebar = async ({
           />
         ))}
       </div>
+      {!!course.evaluations?.length && (
+        <div className="flex flex-col w-full border-t mt-2 pt-2">
+          <p className="px-6 py-2 text-xs font-semibold uppercase text-slate-500">
+            Evaluaciones
+          </p>
+          {course.evaluations.map(evaluation => (
+            <CourseEvaluationItem
+              key={evaluation.id}
+              id={evaluation.id}
+              label={evaluation.title}
+              courseId={course.id}
+              passed={!!evaluation.attempts?.[0]?.passed}
+              attempted={!!evaluation.attempts?.length}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

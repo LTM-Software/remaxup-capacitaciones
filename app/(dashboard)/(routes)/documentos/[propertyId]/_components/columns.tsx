@@ -2,16 +2,11 @@
 
 import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal, Eye } from "lucide-react";
+import { ArrowUpDown, Eye, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { DocumentFromTemplate } from "@/types/next-auth";
 import Link from "next/link";
+import { HtmlPreviewModal } from "@/components/html-preview-modal";
 
 export const createColumns = (
   propertyId: string
@@ -67,26 +62,29 @@ export const createColumns = (
   {
     id: "actions",
     cell: ({ row }) => {
-      const { id } = row.original;
-      const href = `/documentos/${propertyId}/documentFromTemplate/${id}`;
+      const doc = row.original as DocumentFromTemplate & {
+        content?: string;
+      };
+      const href = `/documentos/${propertyId}/documentFromTemplate/${doc.id}`;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-4 w-8 p-0">
-              <span className="sr-only">Abrir menú</span>
-              <MoreHorizontal className="h-4 w-4" />
+        <div className="flex items-center justify-end gap-x-2">
+          <HtmlPreviewModal
+            title={doc.title}
+            content={doc.content}
+          >
+            <Button variant="ghost" size="sm" className="h-8">
+              <Eye className="h-4 w-4 mr-1" />
+              Vista previa
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <Link href={href}>
-              <DropdownMenuItem className="cursor-pointer">
-                <Eye className="h-4 w-4 mr-2" />
-                Ver
-              </DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </HtmlPreviewModal>
+          <Link href={href}>
+            <Button variant="ghost" size="sm" className="h-8">
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Abrir
+            </Button>
+          </Link>
+        </div>
       );
     },
   },

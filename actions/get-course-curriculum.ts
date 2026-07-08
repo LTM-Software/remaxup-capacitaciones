@@ -53,7 +53,7 @@ export const getCourseCurriculum = async ({
   courseId,
   isAdmin = false,
 }: Props) => {
-  const [chapters, evaluations, purchase] = await Promise.all([
+  const [chapters, evaluations] = await Promise.all([
     db.chapter.findMany({
       where: { courseId, isPublished: true },
       orderBy: { position: "asc" },
@@ -75,12 +75,10 @@ export const getCourseCurriculum = async ({
         },
       },
     }),
-    db.purchase.findUnique({
-      where: { userId_courseId: { userId, courseId } },
-    }),
   ]);
 
-  const hasPurchase = !!purchase;
+  // Plataforma de capacitaciones internas: todo agente logueado accede a
+  // todos los cursos (no hay "compra"). Solo aplica el bloqueo secuencial.
   const requiredEvals = evaluations.filter(e => e.isRequired);
   const allRequiredPassed =
     requiredEvals.length === 0 ||
@@ -160,14 +158,6 @@ export const getCourseCurriculum = async ({
     if (isAdmin) {
       u.locked = false;
     } else {
-      if (u.kind === "section" && !u.isFree && !hasPurchase) {
-        u.locked = true;
-        u.lockReason = "Necesitás el curso para acceder.";
-      }
-      if (u.kind === "evaluation" && !hasPurchase) {
-        u.locked = true;
-        u.lockReason = "Necesitás el curso para acceder.";
-      }
       if (blockedFrom) {
         u.locked = true;
         u.lockReason = `Aprobá "${blockingTitle}" para continuar.`;
@@ -231,5 +221,10 @@ export const getCourseCurriculum = async ({
     };
   });
 
-  return { items: flat, groups, hasPurchase, allRequiredPassed };
+  return {
+    items: flat,
+    groups,
+    hasPurchase: true,
+    allRequiredPassed,
+  };
 };

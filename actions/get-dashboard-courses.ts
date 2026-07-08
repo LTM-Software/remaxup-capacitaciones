@@ -18,27 +18,28 @@ export const getDashboardCourses = async (
   userId: string
 ): Promise<DashboardCourses> => {
   try {
-    const purchasedCourses = await db.purchase.findMany({
-      where: {
-        userId: userId,
-      },
+    // Sin "compra": los cursos "en progreso/completados" son aquellos donde
+    // el usuario tiene avance (secciones completadas).
+    const progressed = await db.sectionProgress.findMany({
+      where: { userId, isCompleted: true },
       select: {
-        course: {
-          include: {
-            category: true,
-            chapters: {
-              where: {
-                isPublished: true,
-              },
-            },
-          },
+        section: {
+          select: { chapter: { select: { courseId: true } } },
         },
       },
     });
 
-    const courses = purchasedCourses.map(
-      purchase => purchase.course
-    ) as CourseWithProgressWithCategory[];
+    const courseIds = Array.from(
+      new Set(progressed.map(r => r.section.chapter.courseId))
+    );
+
+    const courses = (await db.course.findMany({
+      where: { id: { in: courseIds } },
+      include: {
+        category: true,
+        chapters: { where: { isPublished: true } },
+      },
+    })) as CourseWithProgressWithCategory[];
 
     for (let course of courses) {
       const progress = await getProgress(userId, course.id);

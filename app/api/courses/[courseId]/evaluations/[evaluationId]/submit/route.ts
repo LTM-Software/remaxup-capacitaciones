@@ -19,33 +19,18 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Debe tener el curso comprado (o ser admin para probar)
-    const purchase = await db.purchase.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId: params.courseId,
-        },
-      },
-    });
-
     const admin = isAdmin(role);
 
-    if (!purchase && !admin) {
-      return new NextResponse(
-        "Necesitás tener el curso para rendir la evaluación",
-        { status: 403 }
-      );
-    }
-
-    // Bloqueo secuencial / final (servidor)
+    // No hay "compra": todo agente logueado puede rendir.
+    // Solo se valida el bloqueo secuencial / final del servidor.
     const { items } = await getCourseCurriculum({
       userId,
       courseId: params.courseId,
       isAdmin: admin,
     });
     const current = items.find(
-      i => i.type === "evaluation" && i.id === params.evaluationId
+      i =>
+        i.kind === "evaluation" && i.id === params.evaluationId
     );
     if (current?.locked && !admin) {
       return new NextResponse(

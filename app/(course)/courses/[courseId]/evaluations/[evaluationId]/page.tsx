@@ -42,27 +42,20 @@ const TakeEvaluationPage = async ({
     return redirect(`/courses/${params.courseId}`);
   }
 
-  const purchase = await db.purchase.findUnique({
-    where: {
-      userId_courseId: { userId, courseId: params.courseId },
-    },
-  });
-
   const admin = isAdmin(role);
 
-  // Bloqueo secuencial / final
+  // Bloqueo secuencial / final (no hay "compra": todos acceden)
   const { items } = await getCourseCurriculum({
     userId,
     courseId: params.courseId,
     isAdmin: admin,
   });
   const currentItem = items.find(
-    i => i.type === "evaluation" && i.id === params.evaluationId
+    i => i.kind === "evaluation" && i.id === params.evaluationId
   );
-  const sequentiallyLocked =
-    !!currentItem?.locked && (!!purchase || admin) && !admin;
+  const sequentiallyLocked = !!currentItem?.locked && !admin;
 
-  const canTake = !!purchase || admin;
+  const canTake = true;
 
   const lastAttempt = await db.evaluationAttempt.findFirst({
     where: { userId, evaluationId: evaluation.id },

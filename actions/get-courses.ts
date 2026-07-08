@@ -39,11 +39,6 @@ export const getCourses = async ({
             id: true,
           },
         },
-        purchases: {
-          where: {
-            userId,
-          },
-        },
       },
       orderBy: {
         createdAt: "desc",
@@ -53,21 +48,17 @@ export const getCourses = async ({
     const coursesWithProgress: CourseWithProgressWithCategory[] =
       await Promise.all(
         courses.map(async course => {
-          if (course.purchases.length === 0) {
-            return {
-              ...course,
-              progress: null,
-            };
-          }
-
           const progressPercentage = await getProgress(
             userId,
             course.id
           );
 
+          // Sin "compra": se muestra la barra solo si el usuario ya tiene
+          // avance (secciones completadas).
           return {
             ...course,
-            progress: progressPercentage,
+            progress:
+              progressPercentage > 0 ? progressPercentage : null,
           };
         })
       );

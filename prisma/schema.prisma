@@ -383,19 +383,37 @@ model EvaluationAttempt {
 // ------------------- SECCIONES POR CAPÍTULO (páginas + documentos) -------------------
 
 model ChapterSection {
-  id       String @id @default(uuid())
+  id       String  @id @default(uuid())
   title    String
   position Int
+  content  String? @db.MediumText // documento HTML de la sección (media inline)
 
   chapterId String
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  items SectionItem[]
+  items    SectionItem[] // legacy (v2); migrado a `content`
+  progress SectionProgress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([chapterId])
+}
+
+model SectionProgress {
+  id     String @id @default(uuid())
+  userId String
+
+  sectionId String
+  section   ChapterSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  isCompleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, sectionId])
+  @@index([sectionId])
 }
 
 enum SectionItemType {

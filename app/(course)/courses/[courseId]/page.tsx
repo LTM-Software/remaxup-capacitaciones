@@ -14,9 +14,7 @@ const CourseIdPage = async ({
   const userId = session?.user?.id;
   const role = session?.user?.role;
 
-  if (!userId) {
-    return redirect("/login");
-  }
+  if (!userId) return redirect("/login");
 
   const { items } = await getCourseCurriculum({
     userId,
@@ -24,20 +22,16 @@ const CourseIdPage = async ({
     isAdmin: isAdmin(role),
   });
 
-  if (items.length === 0) {
-    return redirect("/");
-  }
+  if (items.length === 0) return redirect("/dashboard");
 
-  // Primer ítem accesible sin completar; si no hay, el primer accesible; si
-  // no, el primero de la lista.
   const target =
     items.find(i => !i.completed && !i.locked) ||
     items.find(i => !i.locked) ||
     items[0];
 
   const href =
-    target.type === "chapter"
-      ? `/courses/${params.courseId}/chapters/${target.id}`
+    target.kind === "section"
+      ? `/courses/${params.courseId}/sections/${target.id}`
       : `/courses/${params.courseId}/evaluations/${target.id}`;
 
   return redirect(href);

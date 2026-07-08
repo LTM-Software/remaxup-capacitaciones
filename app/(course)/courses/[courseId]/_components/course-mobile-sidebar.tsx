@@ -6,20 +6,20 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CurriculumItem } from "@/actions/get-course-curriculum";
+import { SidebarGroup } from "@/actions/get-course-curriculum";
 
 import { CourseSidebar } from "./course-sidebar";
 
 interface CourseMobileSidebarProps {
   course: Course;
-  items: CurriculumItem[];
+  groups: SidebarGroup[];
   progressCount: number;
   hasPurchase: boolean;
 }
 
 export const CourseMobileSidebar = ({
   course,
-  items,
+  groups,
   progressCount,
   hasPurchase,
 }: CourseMobileSidebarProps) => {
@@ -31,7 +31,7 @@ export const CourseMobileSidebar = ({
       <SheetContent side="left" className="p-0 bg-white w-72">
         <CourseSidebar
           course={course}
-          items={items}
+          groups={groups}
           progressCount={progressCount}
           hasPurchase={hasPurchase}
         />

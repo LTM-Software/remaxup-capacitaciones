@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Eye,
   LayoutDashboard,
-  Video,
   FileStack,
 } from "lucide-react";
 
@@ -13,11 +12,9 @@ import { IconBadge } from "@/components/icon-badge";
 import { Banner } from "@/components/banner";
 
 import { ChapterTitleForm } from "./_components/chapter-title-form";
-import { ChapterDescriptionForm } from "./_components/chapter-description-form";
 import { ChapterAccessForm } from "./_components/chapter-access-form";
-import { ChapterVideoForm } from "./_components/chapter-video-form";
 import { ChapterActions } from "./_components/chapter-actions";
-import { SectionsForm } from "./_components/sections-form";
+import { ChapterSectionsManager } from "./_components/chapter-sections-manager";
 
 const ChapterIdPage = async ({
   params,
@@ -30,37 +27,26 @@ const ChapterIdPage = async ({
       courseId: params.courseId,
     },
     include: {
-      muxData: true,
       sections: {
         orderBy: { position: "asc" },
-        include: { items: { orderBy: { position: "asc" } } },
+        select: { id: true, title: true, position: true },
       },
     },
   });
 
   if (!chapter) {
-    return redirect("/");
+    return redirect(`/admin/courses/${params.courseId}`);
   }
 
-  const requiredFields = [
-    chapter.title,
-    chapter.description,
-    chapter.videoUrl,
-  ];
-
-  const totalFields = requiredFields.length;
-  const completedFields = requiredFields.filter(Boolean).length;
-
-  const completionText = `(${completedFields}/${totalFields})`;
-
-  const isComplete = requiredFields.every(Boolean);
+  const isComplete =
+    !!chapter.title && chapter.sections.length > 0;
 
   return (
     <>
       {!chapter.isPublished && (
         <Banner
           variant="warning"
-          label="Este capítulo no está publicado. No va a ser visible en la capacitación"
+          label="Este capítulo no está publicado. No va a ser visible en la capacitación."
         />
       )}
       <div className="p-6">
@@ -71,15 +57,16 @@ const ChapterIdPage = async ({
               className="flex items-center text-sm hover:opacity-75 transition mb-6"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
+              Volver al curso
             </Link>
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col gap-y-2">
                 <h1 className="text-2xl font-medium">
-                  Crear capítulo
+                  Capítulo
                 </h1>
                 <span className="text-sm text-slate-700">
-                  Completa todos los campos {completionText}
+                  Un capítulo agrupa secciones (páginas de
+                  contenido).
                 </span>
               </div>
               <ChapterActions
@@ -91,21 +78,14 @@ const ChapterIdPage = async ({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+          <div className="space-y-6">
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={LayoutDashboard} />
-                <h2 className="text-xl">
-                  Customización del capítulo
-                </h2>
+                <h2 className="text-xl">Datos del capítulo</h2>
               </div>
               <ChapterTitleForm
-                initialData={chapter}
-                courseId={params.courseId}
-                chapterId={params.chapterId}
-              />
-              <ChapterDescriptionForm
                 initialData={chapter}
                 courseId={params.courseId}
                 chapterId={params.chapterId}
@@ -127,28 +107,15 @@ const ChapterIdPage = async ({
           </div>
           <div>
             <div className="flex items-center gap-x-2">
-              <IconBadge icon={Video} />
-              <h2 className="text-xl">Agrega un video</h2>
+              <IconBadge icon={FileStack} />
+              <h2 className="text-xl">Contenido (secciones)</h2>
             </div>
-            <ChapterVideoForm
-              initialData={chapter}
-              chapterId={params.chapterId}
+            <ChapterSectionsManager
               courseId={params.courseId}
+              chapterId={params.chapterId}
+              sections={chapter.sections}
             />
           </div>
-        </div>
-        <div className="mt-8">
-          <div className="flex items-center gap-x-2">
-            <IconBadge icon={FileStack} />
-            <h2 className="text-xl">
-              Secciones (páginas y documentos)
-            </h2>
-          </div>
-          <SectionsForm
-            courseId={params.courseId}
-            chapterId={params.chapterId}
-            sections={chapter.sections}
-          />
         </div>
       </div>
     </>

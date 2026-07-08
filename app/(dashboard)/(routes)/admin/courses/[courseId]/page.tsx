@@ -16,7 +16,6 @@ import { DescriptionForm } from "./_components/description-form";
 import { ImageForm } from "./_components/image-form";
 import { CategoryForm } from "./_components/category-form";
 import { PriceForm } from "./_components/price-form";
-import { AttachmentForm } from "./_components/attachment-form";
 import { CurriculumForm } from "./_components/curriculum-form";
 import { Actions } from "./_components/actions";
 import { getServerSession } from "next-auth/next";
@@ -44,11 +43,6 @@ const CourseIdPage = async ({
       chapters: {
         orderBy: {
           position: "asc",
-        },
-      },
-      attachments: {
-        orderBy: {
-          createdAt: "desc",
         },
       },
       evaluations: {
@@ -139,21 +133,9 @@ const CourseIdPage = async ({
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ListChecks} />
-                <h2 className="text-xl">
-                  Contenido del curso
-                </h2>
+                <h2 className="text-xl">Contenido del curso</h2>
               </div>
               <CurriculumForm
-                initialData={course}
-                courseId={course.id}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-x-2">
-                <IconBadge icon={File} />
-                <h2 className="text-xl">Archivos & Agregados</h2>
-              </div>
-              <AttachmentForm
                 initialData={course}
                 courseId={course.id}
               />

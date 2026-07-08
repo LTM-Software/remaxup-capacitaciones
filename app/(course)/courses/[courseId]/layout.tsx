@@ -35,7 +35,7 @@ const CourseLayout = async ({
     return redirect("/");
   }
 
-  const { items, hasPurchase } = await getCourseCurriculum({
+  const { groups, hasPurchase } = await getCourseCurriculum({
     userId,
     courseId: params.courseId,
     isAdmin: isAdmin(role),
@@ -48,7 +48,7 @@ const CourseLayout = async ({
       <div className="h-[80px] md:pl-80 fixed inset-y-0 w-full z-50">
         <CourseNavbar
           course={course}
-          items={items}
+          groups={groups}
           progressCount={progressCount}
           hasPurchase={hasPurchase}
         />
@@ -56,7 +56,7 @@ const CourseLayout = async ({
       <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50">
         <CourseSidebar
           course={course}
-          items={items}
+          groups={groups}
           progressCount={progressCount}
           hasPurchase={hasPurchase}
         />

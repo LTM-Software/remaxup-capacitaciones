@@ -111,48 +111,8 @@ export const FileNode = Node.create({
   renderHTML({ HTMLAttributes }) {
     const url: string = HTMLAttributes.url || "";
     const name: string = HTMLAttributes.name || "Archivo";
-    const ext = extOf(url);
-
-    if (ext === "pdf") {
-      return [
-        "div",
-        {
-          "data-file-url": url,
-          "data-file-name": name,
-          class: "my-3",
-        },
-        [
-          "iframe",
-          {
-            src: url,
-            class: "w-full rounded-md border",
-            style: "height:600px",
-          },
-        ],
-      ];
-    }
-    if (OFFICE.includes(ext)) {
-      const office =
-        "https://view.officeapps.live.com/op/embed.aspx?src=" +
-        encodeURIComponent(url);
-      return [
-        "div",
-        {
-          "data-file-url": url,
-          "data-file-name": name,
-          class: "my-3",
-        },
-        [
-          "iframe",
-          {
-            src: office,
-            class: "w-full rounded-md border",
-            style: "height:600px",
-          },
-        ],
-      ];
-    }
-    // otros formatos: tarjeta descargable inline
+    // Tarjeta clickeable inline: al abrir, el navegador previsualiza
+    // (PDF/imagen/video) o descarga según el tipo de archivo.
     return [
       "a",
       {
@@ -161,8 +121,7 @@ export const FileNode = Node.create({
         href: url,
         target: "_blank",
         rel: "noopener noreferrer",
-        class:
-          "file-card inline-flex items-center gap-2 my-2 px-3 py-2 border rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 no-underline",
+        class: "file-card",
       },
       `📎 ${name}`,
     ];

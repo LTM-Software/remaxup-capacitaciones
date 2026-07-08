@@ -23,14 +23,20 @@ export class MinioStorageProvider implements IStorageProvider {
   async upload(file: File): Promise<string> {
     const fileBuffer = await convertFileToBuffer(file);
 
-    console.log("Uploading file:", file.name);
-    console.log("Endpoint: ", CONFIG.providers.storage.endpoint);
+    // Key única para evitar colisiones de nombre.
+    const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+    const key = `${Date.now()}-${Math.round(
+      Math.random() * 1e6
+    )}-${safeName}`;
 
     const params = {
       Bucket: CONFIG.providers.storage.bucket as string,
-      Key: file.name,
+      Key: key,
       Body: fileBuffer,
       ACL: "public-read",
+      // Content-Type real para que el navegador pueda previsualizar
+      // (PDF/imagen/video) o descargar según corresponda.
+      ContentType: file.type || "application/octet-stream",
     };
 
     try {
